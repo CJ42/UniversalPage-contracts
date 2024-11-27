@@ -78,6 +78,15 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
     // limit of total deposits in wei.
     // This limits the total number of validators that can be registered.
     uint256 public depositLimit;
+
+    // Total number of ever registered validators
+    uint24 private _totalValidatorsRegistered;
+    IDepositContract private _depositContract;
+
+    function totalValidatorsRegistered() public view returns (uint256) {
+        return uint256(_totalValidatorsRegistered);
+    }
+
     // total number of shares in the vault
     uint256 public totalShares;
     // total amount of active stake in wei on beacon chain
@@ -87,8 +96,6 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
     // total amount of pending withdrawals in wei.
     // This is the amount that is taken from staked balance and may not be immidiately available for withdrawal
     uint256 public totalPendingWithdrawal;
-    // Total number of ever registered validators
-    uint256 public totalValidatorsRegistered;
     // Vault fee in parts per 100,000
     uint32 public fee;
     // Recipient of the vault fee
@@ -97,7 +104,7 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
     uint256 public totalFees;
     // Whether only allowlisted accounts can deposit
     bool public restricted;
-    IDepositContract private _depositContract;
+
     mapping(address => uint256) private _shares;
     mapping(address => bool) private _oracles;
     mapping(address => uint256) private _pendingWithdrawals;
@@ -188,7 +195,7 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
 
     function setDepositLimit(uint256 newDepositLimit) external onlyOperator {
         if (
-            newDepositLimit < totalValidatorsRegistered * DEPOSIT_AMOUNT
+            newDepositLimit < _totalValidatorsRegistered * DEPOSIT_AMOUNT
                 || newDepositLimit > _MAX_VALIDATORS_SUPPORTED * DEPOSIT_AMOUNT
         ) {
             revert InvalidAmount(newDepositLimit);
@@ -300,7 +307,7 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
             revert InvalidAmount(amount);
         }
         uint256 newTotalDeposits =
-            Math.max(totalValidatorsRegistered * DEPOSIT_AMOUNT, totalStaked + totalUnstaked) + amount;
+            Math.max(_totalValidatorsRegistered * DEPOSIT_AMOUNT, totalStaked + totalUnstaked) + amount;
         if (newTotalDeposits > depositLimit) {
             revert DepositLimitExceeded(newTotalDeposits, depositLimit);
         }
@@ -458,7 +465,7 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
             revert ValidatorAlreadyRegistered(pubkey);
         }
         _registeredKeys[pubkey] = true;
-        totalValidatorsRegistered += 1;
+        _totalValidatorsRegistered += 1;
         totalStaked += DEPOSIT_AMOUNT;
         totalUnstaked -= DEPOSIT_AMOUNT;
         bytes memory withdrawalCredentials = abi.encodePacked(hex"010000000000000000000000", address(this));
