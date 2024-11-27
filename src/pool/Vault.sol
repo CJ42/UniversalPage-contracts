@@ -85,7 +85,7 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
     // total amount of inactive stake in wei on execution layer
     uint256 public totalUnstaked;
     // total amount of pending withdrawals in wei.
-    // This is the amount that is taken from staked balance and may not be immidiately available for withdrawal
+    // This is the amount that is taken from staked balance and may not be immediately available for withdrawal
     uint256 public totalPendingWithdrawal;
     // Total number of ever registered validators
     uint256 public totalValidatorsRegistered;
@@ -103,7 +103,7 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
     mapping(address => uint256) private _pendingWithdrawals;
     mapping(address => bool) private _allowlisted;
     mapping(bytes => bool) private _registeredKeys;
-    // Total amount of pending withdrawals that can be claimed immidiately
+    // Total amount of pending withdrawals that can be claimed immediately
     uint256 public totalClaimable;
     address public operator;
 
@@ -391,7 +391,7 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
     // The balance of the vault is the sum of:
     // - totalStaked + totalUnstaked: the total amount of stake on beacon chain and execution layer
     // - totalPendingWithdrawal: the total amount of pending withdrawals
-    // - totalClaimable: the total amount of pending withdrawals that can be claimed immidiately
+    // - totalClaimable: the total amount of pending withdrawals that can be claimed immediately
     // - totalFees: the total amount of fees available for withdrawal
     //
     // Rebalancing is not accounting for potential validator penalties. It is assumed that the penalties
@@ -416,7 +416,7 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
         // account for withdrawals to claim later
         uint256 claimable = totalClaimable + completedWithdrawal;
 
-        // account for partial completeted withdrawals
+        // account for partial completed withdrawals
         uint256 partialWithdrawal = 0;
         if (claimable > totalPendingWithdrawal) {
             partialWithdrawal = claimable - totalPendingWithdrawal;
