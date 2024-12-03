@@ -482,8 +482,8 @@ contract Vault is IVault, ERC165, OwnableUnset, ReentrancyGuardUpgradeable, Paus
     function transferStake(address to, uint256 amount, bytes calldata data)
         external
         override
-        whenNotPaused
         nonReentrant
+        whenNotPaused
     {
         address account = msg.sender;
         if (amount == 0) {
